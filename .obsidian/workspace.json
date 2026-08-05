@@ -20,21 +20,8 @@
               "icon": "lucide-file",
               "title": "04-08-2026 Introduccion a DevOps"
             }
-          },
-          {
-            "id": "56f9fd5aae586d8e",
-            "type": "leaf",
-            "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.13.4"
-              },
-              "icon": "lucide-book-up",
-              "title": "Release Notes 1.13.4"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -199,7 +186,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "56f9fd5aae586d8e",
+  "active": "6d54b4b19d0a6490",
   "lastOpenFiles": [
     "04-08-2026 Introduccion a DevOps.md",
     "Welcome.md"
