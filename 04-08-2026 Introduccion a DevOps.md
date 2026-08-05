@@ -201,7 +201,7 @@ En el Dockerfile se define, entre otras cosas:
 ## Ejemplo de Dockerfile
 
 ```
-# Imagen base sobre la que se construye la nuestra
+# Imagen base sobre la que se construye
 FROM node:20
 
 # Directorio de trabajo dentro del contenedor
@@ -224,4 +224,6 @@ ENV NODE_ENV=production
 
 # Comando que se ejecuta al levantar el contenedor
 CMD ["node", "index.js"]
+
+
 ```

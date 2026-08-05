@@ -20,8 +20,21 @@
               "icon": "lucide-file",
               "title": "04-08-2026 Introduccion a DevOps"
             }
+          },
+          {
+            "id": "56f9fd5aae586d8e",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.13.4"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.13.4"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -41,7 +54,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -174,6 +189,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-git:Open Git source control": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -183,7 +199,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "6d54b4b19d0a6490",
+  "active": "56f9fd5aae586d8e",
   "lastOpenFiles": [
     "04-08-2026 Introduccion a DevOps.md",
     "Welcome.md"
