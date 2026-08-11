@@ -1,1 +1,13 @@
 .obsidian/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# logs
+*.log
+
+# datos persistidos por notes-api al correr fuera de Docker
+notes-api/data/
