@@ -1,0 +1,58 @@
+# ConfigMap: guarda la configuración de ESTA instancia como pares clave-valor.
+# No hace nada por sí solo: recién cobra efecto cuando un contenedor lo
+# referencia (ver envFrom más abajo, en el Deployment).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notes-api-config-2        # nombre con el que el Deployment lo va a referenciar
+data:
+  API_TITLE: "notes-api-instancia-2"                     # título del API (FastAPI(title=...))
+  WELCOME_MESSAGE: "Bienvenido a la instancia 2 de notes-api"  # respuesta de GET /
+  HEALTH_STATUS: "ok-instancia-2"                        # respuesta de GET /health
+  INSTANCE_NAME: "instancia-2"                           # identificador para distinguir la instancia al hacer curl
+---
+# Deployment: la "instancia 2" en sí. Con replicas: 1 y su propio ConfigMap,
+# queda desacoplado de las otras dos instancias (ver sección 5.1 de la nota:
+# un solo Deployment con replicas: 3 no permite configuración distinta por Pod).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-api-deployment-2      # nombre único de este Deployment dentro del namespace
+  labels:
+    app: notes-api                  # label común a las 3 instancias (para verlas agrupadas)
+    instance: instancia-2           # label que identifica a ESTA instancia puntual
+
+spec:
+  replicas: 1                       # una sola réplica: cada instancia es un Deployment aparte
+
+  # selector: qué Pods pertenecen a este Deployment. Incluye "instance" además
+  # de "app" para que no se solape con los selectores de las otras 2 instancias
+  # (si solo usara "app: notes-api", Kubernetes rechazaría el manifiesto por
+  # ambigüedad entre Deployments).
+  selector:
+    matchLabels:
+      app: notes-api
+      instance: instancia-2
+
+  # template: la definición del Pod que este Deployment crea y mantiene.
+  template:
+    metadata:
+      labels:
+        app: notes-api
+        instance: instancia-2       # debe coincidir con spec.selector.matchLabels
+
+    spec:
+      containers:
+        - name: notes-api
+          image: notes-api:k8s          # imagen construida localmente y cargada con `minikube image load`
+          imagePullPolicy: IfNotPresent # no intentar bajarla de un registro remoto, usar la que ya está en el nodo
+
+          ports:
+            - containerPort: 8000       # puerto en el que escucha uvicorn dentro del contenedor
+
+          # envFrom + configMapRef: vuelca TODAS las claves del ConfigMap
+          # como variables de entorno del contenedor. main.py las lee con
+          # os.getenv("API_TITLE", ...), etc.
+          envFrom:
+            - configMapRef:
+                name: notes-api-config-2

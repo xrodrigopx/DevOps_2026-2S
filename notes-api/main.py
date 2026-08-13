@@ -1,9 +1,15 @@
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
 
-app = FastAPI()
+API_TITLE = os.getenv("API_TITLE", "notes-api")
+WELCOME_MESSAGE = os.getenv("WELCOME_MESSAGE", "API activa")
+HEALTH_STATUS = os.getenv("HEALTH_STATUS", "ok")
+INSTANCE_NAME = os.getenv("INSTANCE_NAME", "default")
+
+app = FastAPI(title=API_TITLE)
 
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
@@ -27,7 +33,7 @@ notes: list[str] = load_notes()
 
 @app.get("/")
 def root():
-    return {"message": "API activa"}
+    return {"message": WELCOME_MESSAGE, "title": API_TITLE, "instance": INSTANCE_NAME}
 
 
 @app.post("/add/{note}")
@@ -40,3 +46,8 @@ def add_note(note: str):
 @app.get("/list")
 def list_notes():
     return {"notes": notes}
+
+
+@app.get("/health")
+def health():
+    return {"status": HEALTH_STATUS, "instance": INSTANCE_NAME}
