@@ -485,13 +485,13 @@ Este Deployment por sí solo **no expone nginx de forma estable hacia afuera** �
 
 ---
 
-> La actividad práctica de esta clase (Deployment de 3 instancias de `notes-api` con minikube) se separó a su propia nota: [[2026-08-11-2 Actividad Docker k8s minikube]].
+> La actividad práctica de esta clase (Deployment de 3 instancias de `notes-api` con minikube) se separó a su propia nota: [2026-08-11-2 Actividad Docker k8s minikube](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md).
 
 ## 5. Finalmente, podemos bajar todos los servicios
 
 Durante la clase quedaron **tres cosas distintas** corriendo en la máquina: el contenedor de Docker de la sección 2 (`notes-api-container`), el clúster de minikube, y adentro de ese clúster, los 3 Deployments/ConfigMaps de la actividad. Vamos a bajar todo, pero de una forma **reversible**: la idea es poder cerrar la notebook hoy y, mañana, levantar todo de nuevo sin tener que rehacer los pasos desde cero.
 
-Para eso hay que tener clara una distinción que ya usamos varias veces en la nota (sección 3.6 y sección [[2026-08-11-2 Actividad Docker k8s minikube#1. Antes de arrancar: una trampita del enunciado|1]] de la actividad) pero que vale la pena remarcar acá: **"bajar/detener" no es lo mismo que "borrar/eliminar"**.
+Para eso hay que tener clara una distinción que ya usamos varias veces en la nota (sección 3.6 y sección [1](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#1-antes-de-arrancar-una-trampita-del-enunciado) de la actividad) pero que vale la pena remarcar acá: **"bajar/detener" no es lo mismo que "borrar/eliminar"**.
 
 - **Detener** (`docker stop`, `minikube stop`) apaga el proceso pero conserva su estado guardado en disco: el contenedor sigue existiendo (solo que apagado), el clúster de minikube sigue existiendo con todas sus imágenes cacheadas. Volver a levantarlo es rápido.
 - **Eliminar** (`docker rm`, `kubectl delete`, `minikube delete`) borra el objeto en sí. Algunas cosas eliminadas se recrean fácilmente porque tenemos su "receta" guardada en un archivo (un manifiesto YAML, un `docker run`); otras, como los datos dentro de un volumen, si eliminás el volumen se pierden para siempre.
@@ -529,7 +529,7 @@ Salida real obtenida:
 No resources found in default namespace.
 ```
 
-Importante: esto borra los **objetos de Kubernetes** (Deployments, ConfigMaps, y por lo tanto sus Pods), pero **no** toca ni el clúster de minikube ni la imagen `notes-api:k8s` que ya habíamos cargado adentro con `minikube image load` (sección [[2026-08-11-2 Actividad Docker k8s minikube#6. Pasar nuestra imagen al clúster de minikube|6 de la actividad]]). Esa imagen queda cacheada en el clúster. Es justamente por eso que, para volver a levantar la actividad, alcanza con un `kubectl apply -f k8s/` — no hace falta repetir el `docker build` ni el `minikube image load` (a menos que hayas cambiado el código de la app o eliminado el clúster entero, ver 5.2).
+Importante: esto borra los **objetos de Kubernetes** (Deployments, ConfigMaps, y por lo tanto sus Pods), pero **no** toca ni el clúster de minikube ni la imagen `notes-api:k8s` que ya habíamos cargado adentro con `minikube image load` (sección [6 de la actividad](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#6-pasar-nuestra-imagen-al-clúster-de-minikube)). Esa imagen queda cacheada en el clúster. Es justamente por eso que, para volver a levantar la actividad, alcanza con un `kubectl apply -f k8s/` — no hace falta repetir el `docker build` ni el `minikube image load` (a menos que hayas cambiado el código de la app o eliminado el clúster entero, ver 5.2).
 
 ### 5.2 Apagar el clúster de minikube
 
@@ -547,7 +547,7 @@ Salida real obtenida:
 * 1 node stopped.
 ```
 
-`minikube stop` apaga el contenedor `kicbase` que simula el nodo (sección 3.14 y sección [[2026-08-11-2 Actividad Docker k8s minikube#5. Levantar el clúster con el driver de Docker|5 de la actividad]]), pero **no lo elimina**: todo el disco del "nodo" queda guardado tal cual estaba, incluida la imagen `notes-api:k8s` que cargamos. Lo confirmamos con:
+`minikube stop` apaga el contenedor `kicbase` que simula el nodo (sección 3.14 y sección [5 de la actividad](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#5-levantar-el-clúster-con-el-driver-de-docker)), pero **no lo elimina**: todo el disco del "nodo" queda guardado tal cual estaba, incluida la imagen `notes-api:k8s` que cargamos. Lo confirmamos con:
 
 ```bash
 minikube status
@@ -564,7 +564,7 @@ apiserver: Stopped
 kubeconfig: Stopped
 ```
 
-> Si en algún momento querés liberar por completo el espacio en disco que usa minikube (por ejemplo, se te quedó sin espacio la máquina), la opción es `minikube delete` en lugar de `minikube stop`. Pero ojo: `delete` borra el nodo entero, incluida la imagen que cargamos — la próxima vez habría que repetir `minikube start` **y** `minikube image load notes-api:k8s` (secciones [[2026-08-11-2 Actividad Docker k8s minikube#5. Levantar el clúster con el driver de Docker|5]] y [[2026-08-11-2 Actividad Docker k8s minikube#6. Pasar nuestra imagen al clúster de minikube|6]] de la actividad) antes de poder hacer `kubectl apply` de nuevo. Para "pausar y seguir mañana", `minikube stop` es lo correcto.
+> Si en algún momento querés liberar por completo el espacio en disco que usa minikube (por ejemplo, se te quedó sin espacio la máquina), la opción es `minikube delete` en lugar de `minikube stop`. Pero ojo: `delete` borra el nodo entero, incluida la imagen que cargamos — la próxima vez habría que repetir `minikube start` **y** `minikube image load notes-api:k8s` (secciones [5](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#5-levantar-el-clúster-con-el-driver-de-docker) y [6](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#6-pasar-nuestra-imagen-al-clúster-de-minikube) de la actividad) antes de poder hacer `kubectl apply` de nuevo. Para "pausar y seguir mañana", `minikube stop` es lo correcto.
 
 ### 5.3 Detener el contenedor Docker de la sección 2
 
@@ -619,4 +619,4 @@ kubectl apply -f k8s/
 kubectl get pods
 ```
 
-Si en cambio en algún momento usaste `minikube delete`, tenés que reconstruir la imagen si cambiaste código (`docker build -t notes-api:k8s .`, sección [[2026-08-11-2 Actividad Docker k8s minikube#3. Reconstruir la imagen Docker|3 de la actividad]]) y volver a cargarla en el clúster nuevo (`minikube image load notes-api:k8s`, sección [[2026-08-11-2 Actividad Docker k8s minikube#6. Pasar nuestra imagen al clúster de minikube|6 de la actividad]]) antes del `kubectl apply -f k8s/`.
+Si en cambio en algún momento usaste `minikube delete`, tenés que reconstruir la imagen si cambiaste código (`docker build -t notes-api:k8s .`, sección [3 de la actividad](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#3-reconstruir-la-imagen-docker)) y volver a cargarla en el clúster nuevo (`minikube image load notes-api:k8s`, sección [6 de la actividad](2026-08-11-2%20Actividad%20Docker%20k8s%20minikube.md#6-pasar-nuestra-imagen-al-clúster-de-minikube)) antes del `kubectl apply -f k8s/`.

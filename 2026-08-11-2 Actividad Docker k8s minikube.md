@@ -1,6 +1,6 @@
 # Actividad 2026-08-11: Deployment de 3 instancias de `notes-api` en Kubernetes
 
-Continuación de [[2026-08-11 Docker y Fundamentos de Kubernetes]] — acá se separó la actividad práctica del apunte teórico de esa clase.
+Continuación de [2026-08-11 Docker y Fundamentos de Kubernetes](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md) — acá se separó la actividad práctica del apunte teórico de esa clase.
 
 Enunciado de la actividad:
 
@@ -12,7 +12,7 @@ No te preocupes si algo no te cierra a la primera lectura: la idea de esta secci
 
 El enunciado pide "un Deployment con 3 instancias" pero también que "cada instancia tenga un parámetro distinto". Estas dos frases, leídas juntas, esconden un malentendido muy común cuando uno recién está aprendiendo Kubernetes.
 
-Repasá la sección [[2026-08-11 Docker y Fundamentos de Kubernetes#3.6 Deployment|3.6 Deployment]] del apunte de Docker y Kubernetes: un Deployment tiene **un solo** `spec.template` (la "receta" del Pod), y `spec.replicas` le dice a Kubernetes cuántas copias **idénticas** de esa receta tiene que mantener corriendo. Es decir, si vos hacés **un** Deployment con `replicas: 3`, Kubernetes te va a crear 3 Pods clonados a partir del mismo template — con el mismo ConfigMap, las mismas variables de entorno, todo igual. No hay forma de que el Pod 1 reciba un valor de ConfigMap distinto al Pod 2 si ambos salen del mismo Deployment, porque el Deployment no sabe "diferenciar" sus propias réplicas entre sí.
+Repasá la sección [3.6 Deployment](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md#36-deployment) del apunte de Docker y Kubernetes: un Deployment tiene **un solo** `spec.template` (la "receta" del Pod), y `spec.replicas` le dice a Kubernetes cuántas copias **idénticas** de esa receta tiene que mantener corriendo. Es decir, si vos hacés **un** Deployment con `replicas: 3`, Kubernetes te va a crear 3 Pods clonados a partir del mismo template — con el mismo ConfigMap, las mismas variables de entorno, todo igual. No hay forma de que el Pod 1 reciba un valor de ConfigMap distinto al Pod 2 si ambos salen del mismo Deployment, porque el Deployment no sabe "diferenciar" sus propias réplicas entre sí.
 
 Entonces, ¿cómo logramos que cada instancia tenga una configuración distinta? La solución es crear **3 Deployments separados**, cada uno con `replicas: 1`, y cada uno apuntando a **su propio ConfigMap**. Cada Deployment es una "instancia" de la aplicación con su propia identidad y su propia configuración; entre los tres suman las 3 instancias que pide el enunciado. Es un poco más de YAML para escribir, pero es la única forma correcta de lograr esto con las piezas que ya conocemos (Deployment + ConfigMap).
 
@@ -82,7 +82,7 @@ Cuatro cosas para notar acá, porque cada una responde a una parte del enunciado
 
 - `API_TITLE` cambia el **título del API** (se lo pasamos a `FastAPI(title=...)`, que es lo que se muestra en la documentación automática en `/docs`).
 - `WELCOME_MESSAGE` cambia la **web inicial** (la respuesta de `GET /`).
-- `HEALTH_STATUS` es el **parámetro de health**. Como la app original no tenía ningún endpoint de salud, se agregó `GET /health`, que es el patrón estándar que usan los orquestadores (incluido Kubernetes, con sus `livenessProbe`/`readinessProbe` de la sección [[2026-08-11 Docker y Fundamentos de Kubernetes#4. Anatomía de un YAML de Deployment (nginx)|4. Anatomía de un YAML de Deployment]] del apunte de Docker y Kubernetes) para preguntarle a una app "¿estás bien?".
+- `HEALTH_STATUS` es el **parámetro de health**. Como la app original no tenía ningún endpoint de salud, se agregó `GET /health`, que es el patrón estándar que usan los orquestadores (incluido Kubernetes, con sus `livenessProbe`/`readinessProbe` de la sección [4. Anatomía de un YAML de Deployment](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md#4-anatomía-de-un-yaml-de-deployment-nginx) del apunte de Docker y Kubernetes) para preguntarle a una app "¿estás bien?".
 - `INSTANCE_NAME` no lo pide el enunciado explícitamente, pero se agregó para poder confirmar a simple vista, al hacer `curl`, con qué instancia estamos hablando. Es una ayuda para nosotros como desarrolladores/estudiantes, no un requisito de Kubernetes.
 
 Todas usan `os.getenv("X", "default")`: si la variable de entorno no existe, la app igual arranca con un valor por defecto. Esto es una buena práctica — la app no debería romperse si alguien la corre sin Kubernetes.
@@ -121,7 +121,7 @@ Salida real obtenida (algunas capas se reutilizan del build anterior gracias al 
 
 ## 4. Instalar minikube
 
-Recordá la sección [[2026-08-11 Docker y Fundamentos de Kubernetes#3.14 minikube|3.14 minikube]] del apunte de Docker y Kubernetes: `minikube` levanta un clúster de Kubernetes real (control plane + nodo), pero corriendo localmente en tu máquina, pensado para aprender y desarrollar sin depender de un clúster en la nube. En macOS, la forma más simple de instalarlo es con Homebrew:
+Recordá la sección [3.14 minikube](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md#314-minikube) del apunte de Docker y Kubernetes: `minikube` levanta un clúster de Kubernetes real (control plane + nodo), pero corriendo localmente en tu máquina, pensado para aprender y desarrollar sin depender de un clúster en la nube. En macOS, la forma más simple de instalarlo es con Homebrew:
 
 ```bash
 brew install minikube
@@ -140,7 +140,7 @@ Esto también instaló `kubernetes-cli` (el paquete que provee `kubectl`) como d
 
 ## 5. Levantar el clúster con el driver de Docker
 
-`minikube` necesita algo sobre lo cual correr su "nodo" (que en realidad es un contenedor o una VM que simula ser un nodo completo de Kubernetes). Como ya teníamos Docker Desktop corriendo, usamos el **driver de Docker**: minikube crea un contenedor especial (`kicbase`) que por dentro corre todos los componentes del clúster (`kube-apiserver`, `etcd`, `kubelet`, etc., de la sección [[2026-08-11 Docker y Fundamentos de Kubernetes#3.3 Componentes de un clúster|3.3 Componentes de un clúster]] del apunte de Docker y Kubernetes).
+`minikube` necesita algo sobre lo cual correr su "nodo" (que en realidad es un contenedor o una VM que simula ser un nodo completo de Kubernetes). Como ya teníamos Docker Desktop corriendo, usamos el **driver de Docker**: minikube crea un contenedor especial (`kicbase`) que por dentro corre todos los componentes del clúster (`kube-apiserver`, `etcd`, `kubelet`, etc., de la sección [3.3 Componentes de un clúster](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md#33-componentes-de-un-clúster) del apunte de Docker y Kubernetes).
 
 ```bash
 minikube start --driver=docker
@@ -317,7 +317,7 @@ Los tres Deployments están `1/1` (un Pod deseado, un Pod corriendo) y cada Conf
 
 ## 9. Confirmar que cada instancia realmente tiene su propia configuración
 
-Falta la prueba de fuego: verificar que el ConfigMap efectivamente cambió el comportamiento de cada Pod. Como estos Pods todavía no tienen un `Service` que los exponga (ver sección [[2026-08-11 Docker y Fundamentos de Kubernetes#3.7 Service|3.7 Service]] del apunte de Docker y Kubernetes — acá optamos por no agregar uno para no sumar complejidad a una actividad que ya tiene varias piezas nuevas), usamos `kubectl port-forward` para abrir un túnel temporal desde un puerto de nuestra máquina hacia el puerto 8000 de cada Deployment:
+Falta la prueba de fuego: verificar que el ConfigMap efectivamente cambió el comportamiento de cada Pod. Como estos Pods todavía no tienen un `Service` que los exponga (ver sección [3.7 Service](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md#37-service) del apunte de Docker y Kubernetes — acá optamos por no agregar uno para no sumar complejidad a una actividad que ya tiene varias piezas nuevas), usamos `kubectl port-forward` para abrir un túnel temporal desde un puerto de nuestra máquina hacia el puerto 8000 de cada Deployment:
 
 ```bash
 kubectl port-forward deployment/notes-api-deployment-1 8001:8000 &
@@ -366,7 +366,7 @@ kubectl describe deployment notes-api-deployment-1
 kubectl describe configmap notes-api-config-1
 ```
 
-> Para bajar todo lo que levantamos en esta actividad (y volver a levantarlo después), ver la sección [[2026-08-11 Docker y Fundamentos de Kubernetes#5. Finalmente, podemos bajar todos los servicios|5. Finalmente, podemos bajar todos los servicios]] del apunte de Docker y Kubernetes.
+> Para bajar todo lo que levantamos en esta actividad (y volver a levantarlo después), ver la sección [5. Finalmente, podemos bajar todos los servicios](2026-08-11%20Docker%20y%20Fundamentos%20de%20Kubernetes.md#5-finalmente-podemos-bajar-todos-los-servicios) del apunte de Docker y Kubernetes.
 
 ## 11. Resumen del recorrido
 
