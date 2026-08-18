@@ -1,0 +1,65 @@
+
+buildear todo:
+docker build --build-arg APP_VERSION=v1 -t notes-api:v1 .
+docker build --build-arg APP_VERSION=v2 -t notes-api:v2 .
+
+iniciar minikube:
+minikube start --driver=docker
+minikube image load notes-api:v1
+minikube image load notes-api:v2
+
+deploy:
+kubectl apply -f k8s/deployment.yaml
+kubectl rollout status deployment/notes-api
+
+help:
+kubectl get pods -o wide
+kubectl get deployments
+kubectl get configmaps
+
+probar v1:
+kubectl port-forward service/notes-api 8000:8000 &
+curl -s http://localhost:8000/
+curl -s http://localhost:8000/version
+curl -s -X POST http://localhost:8000/add/comprar-pan
+curl -s http://localhost:8000/list
+curl -s http://localhost:8000/health
+
+hacer el rolling update:
+kubectl set image deployment/notes-api notes-api=notes-api:v2
+kubectl rollout status deployment/notes-api
+
+ver que el pod nuevo entro antes de matar el viejo 
+kubectl get pods   
+
+matar el tunel viejo:
+kill %1 2>/dev/null   # o: pkill -f "kubectl port-forward"
+kubectl port-forward service/notes-api 8000:8000 &
+
+probar el tunel nuevo:
+curl -s http://localhost:8000/
+curl -s http://localhost:8000/version
+curl -s http://localhost:8000/health
+curl -s http://localhost:8000/list
+curl -s -X POST http://localhost:8000/add/comprar-jabon
+
+ver el trace:
+kubectl rollout history deployment/notes-api
+
+volver a la anterior:
+kubectl rollout undo deployment/notes-api
+
+matar el tunel nuevamente: 
+kill %1 2>/dev/null   # o: pkill -f "kubectl port-forward"
+
+levantar el nuevo: 
+kubectl port-forward service/notes-api 8000:8000 &
+
+volver a probar la version: 
+curl -s http://localhost:8000/version
+
+
+matar todo:
+pkill -f "kubectl port-forward"
+kubectl delete -f k8s/deployment.yaml
+minikube stop

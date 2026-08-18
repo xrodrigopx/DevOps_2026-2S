@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-api-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notes-api
+      version: green
+  template:
+    metadata:
+      labels:
+        app: notes-api
+        version: green
+    spec:
+      containers:
+        - name: notes-api
+          image: notes-api:v2
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
