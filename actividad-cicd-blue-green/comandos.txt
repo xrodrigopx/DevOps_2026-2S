@@ -1,0 +1,47 @@
+
+buildear todo:
+docker build --build-arg APP_VERSION=v1 -t notes-api:v1 .
+docker build --build-arg APP_VERSION=v2 -t notes-api:v2 .
+
+iniciar minikube:
+minikube start --driver=docker
+minikube image load notes-api:v1
+minikube image load notes-api:v2
+
+deploy inicial (solo blue + el service apuntando a blue):
+kubectl apply -f k8s/deployment-blue.yaml
+kubectl apply -f k8s/service.yaml
+kubectl rollout status deployment/notes-api-blue
+
+help:
+kubectl get pods -o wide --show-labels
+kubectl get deployments
+kubectl get services
+
+verificar que el service apunta a blue y corre la imagen v1:
+kubectl get service notes-api -o jsonpath='{.spec.selector.version}'
+kubectl get pods -l version=blue -o jsonpath='{.items[0].spec.containers[0].image}'
+
+desplegar green junto a blue, sigue sirviendo trafico:
+kubectl apply -f k8s/deployment-green.yaml
+kubectl rollout status deployment/notes-api-green
+
+cambiar el selector del service principal de blue a green:
+kubectl patch service notes-api -p '{"spec":{"selector":{"version":"green"}}}'
+
+verificar que el service quedo apuntando a green y corre la imagen v2:
+kubectl get service notes-api -o jsonpath='{.spec.selector.version}'
+kubectl get pods -l version=green -o jsonpath='{.items[0].spec.containers[0].image}'
+
+rollback instantaneo (sin tocar pods, solo vuelve a apuntar a blue):
+kubectl patch service notes-api -p '{"spec":{"selector":{"version":"blue"}}}'
+kubectl get service notes-api -o jsonpath='{.spec.selector.version}'
+
+una vez confirmado que green esta bien, cortar tambien el trafico y limpiar blue:
+kubectl patch service notes-api -p '{"spec":{"selector":{"version":"green"}}}'
+kubectl delete -f k8s/deployment-blue.yaml
+
+matar todo:
+kubectl delete -f k8s/deployment-green.yaml
+kubectl delete -f k8s/service.yaml
+minikube stop
